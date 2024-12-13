@@ -1,0 +1,69 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: nelsonbm2002
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-lambda-crud-node
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action: 
+        - dynamodb:*
+      Resource: 
+        - arn:aws:dynamodb:us-east-1:688567270884:table/BooksTable
+
+functions:
+  hello:
+    handler: src/handler.hello
+    events:
+      - httpApi:
+          path: /  
+          method: get
+          
+  createBook:
+    handler: src/addBook.addBook  
+    events:
+      - httpApi:
+          path: /books  
+          method: post
+
+  getBooks:
+    handler: src/getBook.getBooks  
+    events:
+      - httpApi:
+          path: /books  
+          method: get
+
+  updateBook:
+    handler: src/updateBook.updateBook  
+    events:
+      - httpApi:
+          path: /books/{BookID}  
+          method: put
+
+  deleteBook:
+    handler: src/deleteBook.deleteBook  
+    events:
+      - httpApi:
+          path: /books/{BookID}  
+          method: delete
+          
+plugins:
+  - serverless-offline
+
+resources:
+  Resources:
+    BooksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Books
+        AttributeDefinitions:
+          - AttributeName: BookID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: BookID
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
